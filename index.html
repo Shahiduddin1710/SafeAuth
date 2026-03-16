@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"/>
+<title>SafeAuth</title>
+<meta name="theme-color" content="#FFFFFF"/>
+<meta name="mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="default"/>
+<link rel="manifest" href="manifest.json"/>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jsQR/1.4.0/jsQR.min.js"></script>
+<style>
+:root{
+  --bg:#F7F8FA;--bg2:#FFFFFF;--bg3:#F0F2F5;
+  --border:#E8EAED;--border2:#DDE1E7;
+  --accent:#2563EB;--accent-light:#EFF6FF;--accent-mid:#DBEAFE;
+  --text:#111827;--text2:#6B7280;--text3:#9CA3AF;
+  --danger:#EF4444;--warn:#F59E0B;--success:#10B981;
+  --r:18px;--r-sm:12px;--r-xs:8px;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Plus Jakarta Sans',sans-serif;max-width:430px;margin:0 auto;overflow-x:hidden;}
+.hdr{padding:52px 20px 16px;display:flex;align-items:center;justify-content:space-between;background:#fff;position:sticky;top:0;z-index:50;border-bottom:1px solid var(--border);}
+.logo{font-size:20px;font-weight:800;color:var(--text);display:flex;align-items:center;gap:8px;}
+.logo-mark{width:32px;height:32px;background:var(--accent);border-radius:9px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:14px;font-weight:800;}
+.hdr-btn{background:var(--bg3);border:1px solid var(--border);border-radius:10px;width:36px;height:36px;color:var(--text2);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .15s,border-color .15s;}
+.hdr-btn:active{background:var(--accent-light);border-color:var(--accent);color:var(--accent);}
+.content{padding:16px 16px 100px;}
+.cat-label{font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text3);margin:20px 0 10px 4px;}
+.card{background:#fff;border:1px solid var(--border);border-radius:var(--r);padding:18px;margin-bottom:10px;box-shadow:0 1px 4px rgba(0,0,0,0.04);transition:border-color .2s,box-shadow .2s;}
+.card.flash{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-mid);}
+.card-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;}
+.card-left{display:flex;align-items:center;gap:12px;}
+.card-ico{width:42px;height:42px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:800;color:#fff;flex-shrink:0;overflow:hidden;}
+.card-ico img{width:100%;height:100%;object-fit:cover;border-radius:12px;}
+.card-ico span{font-size:18px;font-weight:800;color:#fff;}
+.card-name{font-size:15px;font-weight:700;color:var(--text);}
+.card-acc{font-size:12px;color:var(--text2);margin-top:2px;max-width:210px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.card-menu{background:none;border:none;color:var(--text3);font-size:20px;cursor:pointer;padding:4px 6px;line-height:1;border-radius:6px;transition:background .15s;}
+.card-menu:active{background:var(--bg3);}
+.otp-row{display:flex;align-items:center;gap:10px;}
+.otp-btn{flex:1;background:var(--bg3);border:1.5px solid var(--border2);border-radius:var(--r-sm);padding:14px 16px;font-family:'IBM Plex Mono',monospace;font-size:28px;font-weight:600;letter-spacing:6px;color:var(--accent);cursor:pointer;text-align:center;transition:all .15s;user-select:none;}
+.otp-btn:active{background:var(--accent-light);border-color:var(--accent);}
+.otp-btn.dim{color:var(--text3);}
+.hint{font-size:11px;color:var(--text3);text-align:center;margin-top:5px;}
+.ring-wrap{position:relative;width:44px;height:44px;flex-shrink:0;}
+.ring-wrap svg{transform:rotate(-90deg);}
+.ring-bg{fill:none;stroke:var(--border2);stroke-width:3;}
+.ring-fg{fill:none;stroke:var(--accent);stroke-width:3;stroke-linecap:round;transition:stroke-dashoffset 1s linear,stroke .4s;}
+.ring-fg.w{stroke:var(--warn);}
+.ring-fg.d{stroke:var(--danger);}
+.ring-num{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:600;color:var(--text2);}
+.empty{text-align:center;padding:60px 20px;}
+.empty-ico{font-size:52px;margin-bottom:16px;}
+.empty h3{font-size:18px;font-weight:700;margin-bottom:6px;color:var(--text);}
+.empty p{font-size:13px;color:var(--text2);line-height:1.7;}
+.fab{position:fixed;bottom:28px;right:20px;width:54px;height:54px;background:var(--accent);border:none;border-radius:16px;color:#fff;font-size:26px;cursor:pointer;box-shadow:0 4px 20px rgba(37,99,235,0.35);display:flex;align-items:center;justify-content:center;transition:transform .2s,box-shadow .2s;z-index:200;}
+.fab:active{transform:scale(0.93);}
+.backdrop{position:fixed;inset:0;background:rgba(17,24,39,0.4);backdrop-filter:blur(8px);z-index:300;display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity .25s;}
+.backdrop.on{opacity:1;pointer-events:all;}
+.sheet{background:#fff;border-radius:24px 24px 0 0;padding:20px 20px 44px;width:100%;max-width:430px;transform:translateY(100%);transition:transform .3s cubic-bezier(.34,1.3,.64,1);max-height:92dvh;overflow-y:auto;}
+.backdrop.on .sheet{transform:translateY(0);}
+.handle{width:40px;height:4px;background:var(--border2);border-radius:4px;margin:0 auto 22px;}
+.sheet-title{font-size:20px;font-weight:800;color:var(--text);margin-bottom:4px;}
+.sheet-sub{font-size:13px;color:var(--text2);margin-bottom:22px;line-height:1.6;}
+.opt{display:flex;align-items:center;gap:14px;padding:15px;background:var(--bg);border:1px solid var(--border);border-radius:var(--r-sm);cursor:pointer;margin-bottom:10px;transition:border-color .2s,background .15s;}
+.opt:active{background:var(--accent-light);border-color:var(--accent);}
+.opt-ico{width:44px;height:44px;background:#fff;border:1px solid var(--border);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;}
+.opt-txt h4{font-size:14px;font-weight:700;color:var(--text);}
+.opt-txt p{font-size:12px;color:var(--text2);margin-top:2px;}
+.field{margin-bottom:14px;}
+.field label{font-size:11px;font-weight:700;letter-spacing:.8px;color:var(--text2);text-transform:uppercase;display:block;margin-bottom:7px;}
+.field input,.field select{width:100%;padding:13px 14px;background:var(--bg);border:1.5px solid var(--border2);border-radius:var(--r-sm);color:var(--text);font-family:'Plus Jakarta Sans',sans-serif;font-size:14px;outline:none;transition:border-color .2s,box-shadow .2s;appearance:none;}
+.field input:focus,.field select:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-mid);}
+.field input.mono{font-family:'IBM Plex Mono',monospace;letter-spacing:2px;font-size:13px;}
+.btn-p{width:100%;padding:15px;background:var(--accent);color:#fff;border:none;border-radius:var(--r-sm);font-family:'Plus Jakarta Sans',sans-serif;font-size:15px;font-weight:700;cursor:pointer;transition:opacity .2s,transform .15s;margin-top:6px;box-shadow:0 2px 12px rgba(37,99,235,0.25);}
+.btn-p:active{opacity:0.88;transform:scale(0.98);}
+.btn-s{width:100%;padding:13px;background:transparent;color:var(--text2);border:1.5px solid var(--border2);border-radius:var(--r-sm);font-family:'Plus Jakarta Sans',sans-serif;font-size:14px;font-weight:600;cursor:pointer;margin-top:8px;transition:border-color .2s,color .2s,background .15s;}
+.btn-s:active{background:var(--bg);border-color:var(--accent);color:var(--accent);}
+#qr-video-wrap{border-radius:var(--r);overflow:hidden;background:#000;margin-bottom:14px;position:relative;}
+#qr-video{width:100%;display:block;}
+.qr-frame-overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;}
+.qr-frame{width:200px;height:200px;border:2.5px solid var(--accent);border-radius:16px;box-shadow:0 0 0 9999px rgba(0,0,0,0.45);}
+.ctx{position:fixed;background:#fff;border:1px solid var(--border);border-radius:var(--r-sm);min-width:175px;box-shadow:0 8px 30px rgba(0,0,0,0.12);z-index:600;opacity:0;pointer-events:none;transform:scale(0.93);transform-origin:top right;transition:opacity .15s,transform .15s;}
+.ctx.on{opacity:1;pointer-events:all;transform:scale(1);}
+.ctx-item{padding:13px 16px;font-size:14px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:10px;color:var(--text);transition:background .12s;border-radius:4px;}
+.ctx-item:active{background:var(--bg);}
+.ctx-item.red{color:var(--danger);}
+.ctx-sep{height:1px;background:var(--border);margin:2px 0;}
+.toast{position:fixed;top:60px;left:50%;transform:translateX(-50%) translateY(-70px);background:var(--text);color:#fff;padding:10px 22px;border-radius:50px;font-size:13px;font-weight:600;z-index:999;transition:transform .3s cubic-bezier(.34,1.4,.64,1);pointer-events:none;white-space:nowrap;box-shadow:0 4px 16px rgba(0,0,0,0.15);}
+.toast.on{transform:translateX(-50%) translateY(0);}
+</style>
+</head>
+<body>
+
+<div class="toast" id="toast"></div>
+
+<div class="ctx" id="ctx">
+  <div class="ctx-item" onclick="ctxCopy()">&#128203; Copy OTP</div>
+  <div class="ctx-item" onclick="ctxEdit()">&#9999;&#65039; Edit</div>
+  <div class="ctx-sep"></div>
+  <div class="ctx-item red" onclick="ctxDelete()">&#128465;&#65039; Delete</div>
+</div>
+
+<div class="hdr">
+  <div class="logo"><div class="logo-mark">S</div>SafeAuth</div>
+  <button class="hdr-btn" onclick="openSheet('sheetOptions')">&#8943;</button>
+</div>
+
+<div class="content" id="list"></div>
+<button class="fab" onclick="openSheet('sheetAdd')">+</button>
+
+<div class="backdrop" id="sheetAdd">
+  <div class="sheet">
+    <div class="handle"></div>
+    <div class="sheet-title">Add Account</div>
+    <div class="sheet-sub">How do you want to add your 2FA?</div>
+    <div class="opt" onclick="openCamera()"><div class="opt-ico">&#128247;</div><div class="opt-txt"><h4>Scan QR Code</h4><p>Use camera to scan live</p></div></div>
+    <div class="opt" onclick="openGallery()"><div class="opt-ico">&#128444;&#65039;</div><div class="opt-txt"><h4>Upload from Gallery</h4><p>Pick any QR image from phone</p></div></div>
+    <div class="opt" onclick="openManual()"><div class="opt-ico">&#9000;&#65039;</div><div class="opt-txt"><h4>Enter Manually</h4><p>Type in the secret key</p></div></div>
+    <button class="btn-s" onclick="closeSheet('sheetAdd')">Cancel</button>
+  </div>
+</div>
+
+<div class="backdrop" id="sheetCamera">
+  <div class="sheet">
+    <div class="handle"></div>
+    <div class="sheet-title">Scan QR Code</div>
+    <div class="sheet-sub">Point your camera at the 2FA QR code</div>
+    <div id="qr-video-wrap">
+      <video id="qr-video" playsinline autoplay muted></video>
+      <div class="qr-frame-overlay"><div class="qr-frame"></div></div>
+      <canvas id="qr-canvas" style="display:none"></canvas>
+    </div>
+    <button class="btn-s" onclick="stopCamera()">Cancel</button>
+  </div>
+</div>
+
+<div class="backdrop" id="sheetManual">
+  <div class="sheet">
+    <div class="handle"></div>
+    <div class="sheet-title" id="manualTitle">Add Account</div>
+    <div class="sheet-sub">Fill in your account details</div>
+    <div class="field"><label>Service Name</label><input id="f-service" placeholder="Google....."/></div>
+    <div class="field"><label>Account / Email</label><input id="f-account" placeholder="you@email.com"/></div>
+    <div class="field"><label>Secret Key</label><input id="f-secret" class="mono" placeholder="JBSWY3DPEHPK3PXP"/></div>
+    <div class="field">
+      <label>Category <span style="color:var(--text3);font-size:10px;text-transform:none;letter-spacing:0">(optional)</span></label>
+      <select id="f-cat">
+        <option value="">None</option>
+        <option value="Work">Work</option>
+        <option value="Social">Social</option>
+        <option value="Finance">Finance</option>
+        <option value="Personal">Personal</option>
+      </select>
+    </div>
+    <button class="btn-p" onclick="saveAccount()">Save Account</button>
+    <button class="btn-s" onclick="closeSheet('sheetManual')">Cancel</button>
+  </div>
+</div>
+
+<div class="backdrop" id="sheetOptions">
+  <div class="sheet">
+    <div class="handle"></div>
+    <div class="sheet-title">Options</div>
+    <div style="margin-top:10px">
+      <div class="opt" onclick="doExport()"><div class="opt-ico">&#128228;</div><div class="opt-txt"><h4>Export Backup</h4><p>Save all accounts as JSON</p></div></div>
+      <div class="opt" onclick="doImport()"><div class="opt-ico">&#128229;</div><div class="opt-txt"><h4>Import Backup</h4><p>Restore from backup file</p></div></div>
+      <div class="opt" onclick="doClearAll()"><div class="opt-ico">&#128465;&#65039;</div><div class="opt-txt"><h4 style="color:var(--danger)">Clear All</h4><p>Delete everything</p></div></div>
+    </div>
+    <button class="btn-s" onclick="closeSheet('sheetOptions')">Cancel</button>
+  </div>
+</div>
+
+<input type="file" id="galleryInput" accept="image/*" style="display:none" onchange="handleGalleryQR(event)"/>
+<input type="file" id="importInput" accept=".json" style="display:none" onchange="handleImport(event)"/>
+
+<script>
+async function hmac(key,msg){const k=await crypto.subtle.importKey('raw',key,{name:'HMAC',hash:'SHA-1'},false,['sign']);return new Uint8Array(await crypto.subtle.sign('HMAC',k,msg));}
+function b32(s){const a='ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';s=s.toUpperCase().replace(/=+$/,'');let bits=0,val=0;const out=[];for(const c of s){const i=a.indexOf(c);if(i<0)continue;val=(val<<5)|i;bits+=5;if(bits>=8){bits-=8;out.push((val>>bits)&0xFF);}}return new Uint8Array(out);}
+function i64(n){const b=new Uint8Array(8);let t=n;for(let i=7;i>=0;i--){b[i]=t&0xFF;t=Math.floor(t/256);}return b;}
+async function genTotp(secret){try{const key=b32(secret);const ctr=Math.floor(Date.now()/30000);const mac=await hmac(key,i64(ctr));const off=mac[mac.length-1]&0xF;const code=((mac[off]&0x7F)<<24)|((mac[off+1]&0xFF)<<16)|((mac[off+2]&0xFF)<<8)|(mac[off+3]&0xFF);return String(code%1000000).padStart(6,'0');}catch{return '------';}}
+
+let accounts=JSON.parse(localStorage.getItem('sa3')||'[]');
+let cache={};let editId=null;let ctxId=null;
+function persist(){localStorage.setItem('sa3',JSON.stringify(accounts));}
+
+const BRAND_COLORS={'google':'#EA4335','github':'#24292E','twitter':'#1DA1F2','x':'#000000','facebook':'#1877F2','instagram':'#E1306C','microsoft':'#00A4EF','apple':'#555555','amazon':'#FF9900','discord':'#5865F2','slack':'#4A154B','paypal':'#003087','stripe':'#6772E5','dropbox':'#0061FF','netflix':'#E50914','spotify':'#1DB954','linkedin':'#0A66C2','whatsapp':'#25D366','telegram':'#2AABEE','reddit':'#FF4500','tiktok':'#000000','twitch':'#9146FF','uber':'#000000','airbnb':'#FF5A5F'};
+const BRAND_LOGOS={'google':'https://www.google.com/favicon.ico','github':'https://github.com/favicon.ico','twitter':'https://abs.twimg.com/favicons/twitter.3.ico','facebook':'https://www.facebook.com/favicon.ico','instagram':'https://www.instagram.com/favicon.ico','microsoft':'https://www.microsoft.com/favicon.ico','apple':'https://www.apple.com/favicon.ico','amazon':'https://www.amazon.com/favicon.ico','discord':'https://discord.com/favicon.ico','slack':'https://slack.com/favicon.ico','paypal':'https://www.paypal.com/favicon.ico','stripe':'https://stripe.com/favicon.ico','dropbox':'https://www.dropbox.com/favicon.ico','netflix':'https://www.netflix.com/favicon.ico','spotify':'https://open.spotify.com/favicon.ico','linkedin':'https://www.linkedin.com/favicon.ico','whatsapp':'https://web.whatsapp.com/favicon.ico','telegram':'https://web.telegram.org/favicon.ico','reddit':'https://www.reddit.com/favicon.ico','twitch':'https://www.twitch.tv/favicon.ico'};
+const FALLBACK_COLORS=['#2563EB','#7C3AED','#DC2626','#D97706','#059669','#DB2777','#0891B2','#EA580C'];
+
+function getServiceKey(s){
+  const sl=(s||'').toLowerCase();
+  for(const k of Object.keys(BRAND_COLORS)){if(sl.includes(k))return k;}
+  return null;
+}
+function getBgColor(service,id){
+  const k=getServiceKey(service);
+  if(k)return BRAND_COLORS[k];
+  return FALLBACK_COLORS[Math.abs(id)%FALLBACK_COLORS.length];
+}
+function getLogoUrl(service){
+  const k=getServiceKey(service);
+  return k?BRAND_LOGOS[k]:null;
+}
+function renderIco(service,id){
+  const logo=getLogoUrl(service);
+  const bg=getBgColor(service,id);
+  if(logo){
+    return '<div class="card-ico" style="background:'+bg+';padding:6px"><img src="'+logo+'" onerror="this.parentNode.innerHTML=\'<span>'+((service||'?')[0].toUpperCase())+'</span>\'" alt=""/></div>';
+  }
+  return '<div class="card-ico" style="background:'+bg+'"><span>'+((service||'?')[0].toUpperCase())+'</span></div>';
+}
+
+function fmt(o){return o.slice(0,3)+' '+o.slice(3);}
+function rem(){return 30-(Math.floor(Date.now()/1000)%30);}
+const C=2*Math.PI*16;
+
+function renderList(){
+  const el=document.getElementById('list');
+  if(!accounts.length){
+    el.innerHTML='<div class="empty"><div class="empty-ico">&#128737;</div><h3>No accounts yet</h3><p>Tap <strong>+</strong> to add your first 2FA account.</p></div>';
+    return;
+  }
+  const r=rem();const prog=(r/30)*C;const cc=r<=5?'d':r<=10?'w':'';
+  const groups={};
+  for(const a of accounts){const g=a.cat||'';if(!groups[g])groups[g]=[];groups[g].push(a);}
+  let html='';
+  for(const[cat,accs]of Object.entries(groups)){
+    if(cat)html+='<div class="cat-label">'+cat+'</div>';
+    for(const a of accs){
+      const otp=cache[a.id]||'------';
+      html+='<div class="card" id="c'+a.id+'">'
+        +'<div class="card-top"><div class="card-left">'+renderIco(a.service,parseInt(String(a.id).slice(-3)))
+        +'<div><div class="card-name">'+a.service+'</div><div class="card-acc">'+(a.account||'')+'</div></div></div>'
+        +'<button class="card-menu" onclick="openCtx(event,'+a.id+')">&#8943;</button></div>'
+        +'<div class="otp-row"><div style="flex:1">'
+        +'<div class="otp-btn'+(otp==='------'?' dim':'')+'" data-id="'+a.id+'" onclick="copyOtp('+a.id+',this)">'+fmt(otp)+'</div>'
+        +'<div class="hint">tap to copy</div></div>'
+        +'<div class="ring-wrap"><svg width="40" height="40" viewBox="0 0 40 40">'
+        +'<circle class="ring-bg" cx="20" cy="20" r="16"/>'
+        +'<circle class="ring-fg '+cc+'" cx="20" cy="20" r="16" stroke-dasharray="'+C+'" stroke-dashoffset="'+(C-prog)+'"/>'
+        +'</svg><div class="ring-num">'+r+'</div></div></div></div>';
+    }
+  }
+  el.innerHTML=html;
+}
+
+async function refreshOtps(){for(const a of accounts)cache[a.id]=await genTotp(a.secret);}
+
+let lastP=-1;
+function tick(){
+  const r=rem();
+  document.querySelectorAll('.ring-fg').forEach(el=>{el.setAttribute('stroke-dashoffset',C-(r/30)*C);el.className.baseVal='ring-fg '+(r<=5?'d':r<=10?'w':'');});
+  document.querySelectorAll('.ring-num').forEach(el=>el.textContent=r);
+  const p=Math.floor(Date.now()/30000);
+  if(p!==lastP){lastP=p;refreshOtps().then(()=>{document.querySelectorAll('[data-id]').forEach(el=>{const id=parseInt(el.dataset.id);el.textContent=fmt(cache[id]||'------');});});}
+}
+async function boot(){await refreshOtps();renderList();setInterval(tick,1000);}
+boot();
+
+async function decodeQRFromFile(file){
+  return new Promise((resolve)=>{
+    const reader=new FileReader();
+    reader.onload=(ev)=>{
+      const img=new Image();
+      img.onload=()=>{resolve(smartDecode(img));};
+      img.src=ev.target.result;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+function smartTrim(img){
+  const cn=document.createElement('canvas');
+  cn.width=img.width;cn.height=img.height;
+  const ctx=cn.getContext('2d');
+  ctx.drawImage(img,0,0);
+  const d=ctx.getImageData(0,0,cn.width,cn.height).data;
+  const W=cn.width,H=cn.height;
+  let x0=0,x1=W-1,y0=0,y1=H-1;
+  for(let x=0;x<W;x++){let s=0;for(let y=0;y<H;y++){const i=(y*W+x)*4;s+=(d[i]+d[i+1]+d[i+2])/3;}if(s/H>80){x0=x;break;}}
+  for(let x=W-1;x>=0;x--){let s=0;for(let y=0;y<H;y++){const i=(y*W+x)*4;s+=(d[i]+d[i+1]+d[i+2])/3;}if(s/H>80){x1=x;break;}}
+  for(let y=0;y<H;y++){let s=0;for(let x=0;x<W;x++){const i=(y*W+x)*4;s+=(d[i]+d[i+1]+d[i+2])/3;}if(s/W>80){y0=y;break;}}
+  for(let y=H-1;y>=0;y--){let s=0;for(let x=0;x<W;x++){const i=(y*W+x)*4;s+=(d[i]+d[i+1]+d[i+2])/3;}if(s/W>80){y1=y;break;}}
+  return{x:Math.max(0,x0-5),y:Math.max(0,y0-5),w:Math.min(W,x1+5)-Math.max(0,x0-5),h:Math.min(H,y1+5)-Math.max(0,y0-5)};
+}
+
+function makeCanvas(img,sx,sy,sw,sh,scale,threshold,pad){
+  const dw=Math.round(sw*scale)+pad*2,dh=Math.round(sh*scale)+pad*2;
+  const cn=document.createElement('canvas');cn.width=dw;cn.height=dh;
+  const ctx=cn.getContext('2d');
+  ctx.fillStyle='#fff';ctx.fillRect(0,0,dw,dh);
+  ctx.drawImage(img,sx,sy,sw,sh,pad,pad,dw-pad*2,dh-pad*2);
+  if(threshold!=null){
+    const id=ctx.getImageData(0,0,dw,dh);const d=id.data;
+    for(let i=0;i<d.length;i+=4){const g=0.299*d[i]+0.587*d[i+1]+0.114*d[i+2];const v=g>threshold?255:0;d[i]=d[i+1]=d[i+2]=v;}
+    ctx.putImageData(id,0,0);
+  }
+  return ctx.getImageData(0,0,dw,dh);
+}
+
+function jsqrScan(imageData){
+  if(!window.jsQR)return null;
+  const r=jsQR(imageData.data,imageData.width,imageData.height,{inversionAttempts:'attemptBoth'});
+  return r?r.data:null;
+}
+
+function smartDecode(img){
+  const W=img.width,H=img.height;
+  const t=smartTrim(img);
+  const variants=[
+    [t.x,t.y,t.w,t.h,1.0,null,60],
+    [t.x,t.y,t.w,t.h,1.5,null,60],
+    [t.x,t.y,t.w,t.h,2.0,null,60],
+    [t.x,t.y,t.w,t.h,1.0,128,60],
+    [t.x,t.y,t.w,t.h,1.5,110,60],
+    [t.x,t.y,t.w,t.h,1.0,90,60],
+    [t.x,t.y,t.w,t.h,1.0,150,60],
+    [0,0,W,H,1.0,null,60],
+    [0,0,W,H,1.5,null,60],
+    [0,0,W,H,1.0,128,60],
+    [0,0,W,H,2.0,128,60],
+  ];
+  for(const[sx,sy,sw,sh,scale,thresh,pad]of variants){
+    if(sw<=0||sh<=0)continue;
+    try{const result=jsqrScan(makeCanvas(img,sx,sy,sw,sh,scale,thresh,pad));if(result)return result;}catch(e){}
+  }
+  return null;
+}
+
+async function copyOtp(id,el){
+  const v=cache[id];if(!v)return;
+  try{await navigator.clipboard.writeText(v);}catch{}
+  const card=document.getElementById('c'+id);
+  if(card){card.classList.add('flash');setTimeout(()=>card.classList.remove('flash'),1200);}
+  toast('Copied!');
+}
+
+function openSheet(id){document.getElementById(id).classList.add('on');}
+function closeSheet(id){document.getElementById(id).classList.remove('on');}
+
+let stream=null,scanInt=null;
+function openCamera(){closeSheet('sheetAdd');openSheet('sheetCamera');startCam();}
+async function startCam(){
+  const v=document.getElementById('qr-video'),cn=document.getElementById('qr-canvas'),ctx=cn.getContext('2d');
+  try{
+    stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'}});
+    v.srcObject=stream;v.play();
+    scanInt=setInterval(()=>{
+      if(v.readyState<2)return;
+      cn.width=v.videoWidth;cn.height=v.videoHeight;ctx.drawImage(v,0,0);
+      const img=ctx.getImageData(0,0,cn.width,cn.height);
+      const code=jsQR(img.data,img.width,img.height);
+      if(code&&code.data){stopCamera();parseUri(code.data);}
+    },300);
+  }catch{stopCamera();toast('Camera denied — use gallery');openManual();}
+}
+function stopCamera(){if(scanInt){clearInterval(scanInt);scanInt=null;}if(stream){stream.getTracks().forEach(t=>t.stop());stream=null;}closeSheet('sheetCamera');}
+
+function openGallery(){closeSheet('sheetAdd');document.getElementById('galleryInput').value='';document.getElementById('galleryInput').click();}
+async function handleGalleryQR(e){
+  const file=e.target.files[0];if(!file)return;
+  toast('Scanning QR code...');
+  try{
+    const result=await decodeQRFromFile(file);
+    if(result){parseUri(result);}
+    else{toast('Could not read QR — try entering manually');openManual();}
+  }catch{toast('Could not read QR — try entering manually');openManual();}
+}
+
+function parseUri(uri){
+  try{
+    const url=new URL(uri);if(url.protocol!=='otpauth:')throw '';
+    const label=decodeURIComponent(url.pathname.slice(2));
+    const p=Object.fromEntries(url.searchParams);
+    const parts=label.includes(':')?label.split(':'):[label,label];
+    document.getElementById('f-service').value=parts[0].trim();
+    document.getElementById('f-account').value=(parts[1]||'').trim();
+    document.getElementById('f-secret').value=(p.secret||'').replace(/\s/g,'');
+    document.getElementById('f-cat').value='';
+    document.getElementById('manualTitle').textContent='Confirm Account';
+    editId=null;openSheet('sheetManual');
+  }catch{toast('Invalid QR code');openManual();}
+}
+
+function openManual(){
+  closeSheet('sheetAdd');editId=null;
+  document.getElementById('manualTitle').textContent='Add Account';
+  ['f-service','f-account','f-secret'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('f-cat').value='';
+  openSheet('sheetManual');
+}
+async function saveAccount(){
+  const service=document.getElementById('f-service').value.trim();
+  const account=document.getElementById('f-account').value.trim();
+  const secret=document.getElementById('f-secret').value.trim().replace(/\s/g,'');
+  const cat=document.getElementById('f-cat').value;
+  if(!service||!secret){toast('Service and secret required');return;}
+  if(editId!==null){const i=accounts.findIndex(a=>a.id===editId);if(i>=0)accounts[i]={...accounts[i],service,account,secret,cat};editId=null;}
+  else accounts.push({id:Date.now(),service,account,secret,cat});
+  persist();closeSheet('sheetManual');await refreshOtps();renderList();toast('Saved!');
+}
+
+function openCtx(e,id){
+  e.stopPropagation();ctxId=id;
+  const m=document.getElementById('ctx');
+  const top=Math.min(e.clientY-10,window.innerHeight-160);
+  m.style.top=top+'px';m.style.right='16px';m.classList.add('on');
+}
+function closeCtx(){document.getElementById('ctx').classList.remove('on');}
+document.addEventListener('click',closeCtx);
+function ctxCopy(){if(ctxId===null)return;const v=cache[ctxId];if(v){navigator.clipboard.writeText(v).catch(()=>{});toast('Copied!');}closeCtx();}
+function ctxEdit(){const a=accounts.find(x=>x.id===ctxId);if(!a)return;closeCtx();editId=a.id;document.getElementById('manualTitle').textContent='Edit Account';document.getElementById('f-service').value=a.service;document.getElementById('f-account').value=a.account||'';document.getElementById('f-secret').value=a.secret;document.getElementById('f-cat').value=a.cat||'';openSheet('sheetManual');}
+function ctxDelete(){if(ctxId===null)return;accounts=accounts.filter(a=>a.id!==ctxId);persist();closeCtx();refreshOtps().then(renderList);toast('Deleted');}
+
+function doExport(){closeSheet('sheetOptions');const blob=new Blob([JSON.stringify(accounts,null,2)],{type:'application/json'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='safeauth-backup.json';a.click();URL.revokeObjectURL(url);toast('Backup exported!');}
+function doImport(){closeSheet('sheetOptions');document.getElementById('importInput').value='';document.getElementById('importInput').click();}
+function handleImport(e){const file=e.target.files[0];if(!file)return;const r=new FileReader();r.onload=ev=>{try{const data=JSON.parse(ev.target.result);if(!Array.isArray(data))throw '';const ex=new Set(accounts.map(a=>a.secret));let added=0;for(const acc of data){if(!acc.secret||ex.has(acc.secret))continue;accounts.push({...acc,id:Date.now()+Math.random()});added++;}persist();refreshOtps().then(renderList);toast('Imported '+added+' account(s)');}catch{toast('Invalid backup file');}};r.readAsText(file);}
+function doClearAll(){if(confirm('Delete ALL accounts? Cannot be undone.')){accounts=[];persist();renderList();closeSheet('sheetOptions');toast('All cleared');}}
+
+let tt;
+function toast(msg){const el=document.getElementById('toast');el.textContent=msg;el.classList.add('on');clearTimeout(tt);tt=setTimeout(()=>el.classList.remove('on'),2500);}
+</script>
+</body>
+</html>
