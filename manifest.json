@@ -3,15 +3,21 @@
   "short_name": "SafeAuth",
   "description": "Your personal TOTP 2FA authenticator app",
   "start_url": "/index.html",
+  "scope": "/",
   "display": "standalone",
   "background_color": "#3B3BFF",
   "theme_color": "#3B3BFF",
   "orientation": "portrait",
   "icons": [
     {
-      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect width='192' height='192' rx='32' fill='%233B3BFF'/><text y='130' x='96' text-anchor='middle' font-size='110' font-family='Arial'>✓</text></svg>",
+      "src": "/icons/icon-192.png",
       "sizes": "192x192",
-      "type": "image/svg+xml"
+      "type": "image/png"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
     }
   ]
 }
